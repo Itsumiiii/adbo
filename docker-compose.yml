@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: adbo_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+    depends_on:
+      - db
+    networks:
+      - adbo_net
+
+  db:
+    image: mysql:8.0
+    container_name: adbo_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-adbo}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - adbo_db_data:/var/lib/mysql
+    networks:
+      - adbo_net
+
+networks:
+  adbo_net:
+    driver: bridge
+
+volumes:
+  adbo_db_data:

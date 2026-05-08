@@ -1,0 +1,40 @@
+{
+    # Enable the FrankenPHP module
+    frankenphp
+
+    # Disable automatic HTTP→HTTPS redirects and ACME cert provisioning.
+    auto_https off
+
+    # Disable the Caddy admin API in production.
+    admin off
+
+    # Structured JSON log
+    log {
+        format json
+        level  ERROR
+    }
+}
+
+# ── Virtual host ──────────────────────────────────────────────
+{$SERVER_NAME:":80"} {
+
+    # Laravel's public/ is the document root
+    root * /var/www/html/public
+
+    # Response compression
+    encode zstd br gzip
+
+    # Security headers
+    header {
+        X-Content-Type-Options    "nosniff"
+        X-Frame-Options           "SAMEORIGIN"
+        X-XSS-Protection          "1; mode=block"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # ── FrankenPHP worker mode ────────────────────────────────
+    php_server {
+        worker /var/www/html/worker.php
+    }
+}
